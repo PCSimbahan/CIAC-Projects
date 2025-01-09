@@ -1,0 +1,72 @@
+const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(); //Gives access and retrieves the values of the spreadsheet 
+//let subject = ("DOCUMENT STILL PENDING!"); // the subject of the email
+//let body = ("This is to remind you that this document is still on pending"); //The body of the email
+
+
+
+//This tracks the deadline and status of the documents (deadline tracker)
+function main(){
+  const lstRw = sheet.getLastRow(); //Gets the Last Row of the column
+  const dueColmnVal = sheet.getRange(10, 7, lstRw).getValues(); //Retrieves the values in row 10, column 7 (Due date column)
+  const statusColmnVal = sheet.getRange(10, 8, lstRw).getValues(); //Retrieves the values in row 10, column 8 (Status column)
+  const numColmnVal = sheet.getRange(10, 1, lstRw).getValues(); //Retrieves the values in row 10, column 1 (Number column)
+  const docNameVal = sheet.getRange(10, 4, lstRw).getValues(); //Retrieves the values in row 10, column 4 (Projects Column)
+ 
+    //Iterates through the number of documents/projects 
+    for (let i = 0; i < dueColmnVal.length; i++){
+      const date = dueColmnVal[i][0]; //Iterates through dates in the due date/deadline column
+      const status = statusColmnVal[i][0]; //Iterates through status in the status column
+      const currDate = new Date(); //Retrieves the date today by creating an object Date()
+      const formattedStatus = Utilities.formatString("%s", status);//Formatting for the status to string
+      const docNum = numColmnVal[i][0];
+      const formattedDocNum = Utilities.formatString("%d", docNum);
+      const docName = docNameVal[i][0];
+      const formattedDocName = Utilities.formatString("%s", docName);
+      const formattedCurrDate = Utilities.formatDate(currDate, "Asia/Manila", "yyyy-MM-dd"); //Formatted Due date to String
+      
+     //console.log(status);
+      //Executes if the data in the column date is equal to object Date, if not, skip
+       if (Object.prototype.toString.call(date) === "[object Date]" && date !== " ") {
+         
+          const formattedDdate = Utilities.formatDate(date, "Asia/Manila", "yyyy-MM-dd"); //Formatted Deadline/due date to String
+
+          //If true, will send email that includes the date, number, name, and status e.g. 01/01/2025, Document No. 101 Document Name: TIGTIGAN TERAKAN is still pending. Due date is today
+          if(formattedDdate === formattedCurrDate && formattedStatus === "Pending"){
+              //sendEmail();
+              console.log(formattedDdate +" Document number: " + formattedDocNum + " Document Name: " + formattedDocName  +" is " + formattedStatus);
+              
+
+          }/*else{
+            console.log(formattedDdate + " Document number: " + formattedDocNum + " Document Name: " + formattedDocName +" is " + formattedStatus);
+            
+          }*/
+          
+       }
+  }
+ }
+
+ 
+//This function sends email
+function sendEmail() {
+  const lstRw = sheet.getLastRow(); //Retrieves the value of the last column that has value.
+	  if(lstRw === 0){
+		  Logger.log("This has no value");	
+	  return;		
+}
+
+//retrieves the values of each cell
+	  const colmnVal = sheet.getRange(1, 11, lstRw).getValues(); 
+
+ // Looping statement that sends email to all the users listed in the column 
+    for(let i = 0; i < colmnVal.length; i++ ){
+      const email = colmnVal[i][0];
+
+      if (typeof email === "string" && email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        MailApp.sendEmail(email, subject, body);
+        Logger.log("Email sent to " + email);
+     }else{
+        Logger.log("No email found at " + (i+1));
+     
+    }
+  }
+} 
