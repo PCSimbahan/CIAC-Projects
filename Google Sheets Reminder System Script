@@ -1,6 +1,9 @@
 const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(); //Gives access and retrieves the values of the spreadsheet 
-//let subject = ("DOCUMENT STILL PENDING!"); // the subject of the email
-//let body = ("This is to remind you that this document is still on pending"); //The body of the email
+
+/*
+docName = Project Name
+docNum = Project Num
+*/
 
 
 
@@ -24,30 +27,25 @@ function main(){
       const formattedDocName = Utilities.formatString("%s", docName);
       const formattedCurrDate = Utilities.formatDate(currDate, "Asia/Manila", "yyyy-MM-dd"); //Formatted Due date to String
       
-     //console.log(status);
+      
       //Executes if the data in the column date is equal to object Date, if not, skip
-       if (Object.prototype.toString.call(date) === "[object Date]" && date !== " ") {
-         
-          const formattedDdate = Utilities.formatDate(date, "Asia/Manila", "yyyy-MM-dd"); //Formatted Deadline/due date to String
-
-          //If true, will send email that includes the date, number, name, and status e.g. 01/01/2025, Document No. 101 Document Name: TIGTIGAN TERAKAN is still pending. Due date is today
+       if (Object.prototype.toString.call(date) === "[object Date]" && date !== "") {
+          const formattedDdate = Utilities.formatDate(date, "Asia/Manila", "yyyy-MM-dd");
+          //console.log(formattedDocNum + " "+ formattedDocName);
           if(formattedDdate === formattedCurrDate && formattedStatus === "Pending"){
-              //sendEmail();
-              console.log(formattedDdate +" Document number: " + formattedDocNum + " Document Name: " + formattedDocName  +" is " + formattedStatus);
-              
-
-          }/*else{
-            console.log(formattedDdate + " Document number: " + formattedDocNum + " Document Name: " + formattedDocName +" is " + formattedStatus);
-            
-          }*/
-          
-       }
+               //console.log("Project Number: " + formattedDocNum + " Project Name: " + formattedDocName + " is still "+ formattedStatus + " and is due today: " + formattedDdate);
+               sendEmail(formattedDocNum, formattedDocName, formattedDdate, formattedStatus);
+          }
+       }  
+      }
   }
- }
 
  
 //This function sends email
-function sendEmail() {
+function sendEmail(docNum, docName, dueDate, status) {
+  let subject = "DUE PROJECT IS STILL PENDING"; //Subject of the email
+  let body = `Project Number: ${docNum}\nProject Name: ${docName}\nStatus: ${status}\nDue Date: ${dueDate}\n\nThis is a reminder that the project is due today!`; //The body of the email
+  
   const lstRw = sheet.getLastRow(); //Retrieves the value of the last column that has value.
 	  if(lstRw === 0){
 		  Logger.log("This has no value");	
@@ -63,10 +61,18 @@ function sendEmail() {
 
       if (typeof email === "string" && email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         MailApp.sendEmail(email, subject, body);
+        console.log(email + " " + subject + " " + body);
         Logger.log("Email sent to " + email);
-     }else{
-        Logger.log("No email found at " + (i+1));
-     
+      }
     }
   }
-} 
+
+function trigger(){
+   // Create a time-based trigger to run the script daily
+    ScriptApp.newTrigger("main")
+    .timeBased()
+    .everyDays(1)
+    .atHour(9) // Adjust to your desired time
+    .create();
+
+}
