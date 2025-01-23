@@ -5,8 +5,6 @@ docName = Project Name
 docNum = Project Num
 */
 
-
-
 //This tracks the deadline and status of the documents (deadline tracker)
 function main(){
   const lstRw = sheet.getLastRow(); //Gets the Last Row of the column
@@ -26,23 +24,21 @@ function main(){
       const docName = docNameVal[i][0];
       const formattedDocName = Utilities.formatString("%s", docName);
       const formattedCurrDate = Utilities.formatDate(currDate, "Asia/Manila", "yyyy-MM-dd"); //Formatted Due date to String
-      
+      let sender = "rbtemplado@gmail.com"; //Configure the sender of the email (set up in Gmail sa alias first)
       
       //Executes if the data in the column date is equal to object Date, if not, skip
        if (Object.prototype.toString.call(date) === "[object Date]" && date !== "") {
           const formattedDdate = Utilities.formatDate(date, "Asia/Manila", "yyyy-MM-dd");
           //console.log(formattedDocNum + " "+ formattedDocName);
           if(formattedDdate === formattedCurrDate && formattedStatus === "Pending"){
-               //console.log("Project Number: " + formattedDocNum + " Project Name: " + formattedDocName + " is still "+ formattedStatus + " and is due today: " + formattedDdate);
-               sendEmail(formattedDocNum, formattedDocName, formattedDdate, formattedStatus);
+               sendEmail(formattedDocNum, formattedDocName, formattedDdate, formattedStatus, sender);
           }
        }  
       }
   }
 
- 
 //This function sends email
-function sendEmail(docNum, docName, dueDate, status) {
+function sendEmail(docNum, docName, dueDate, status, senderEmail) {
   let subject = "DUE PROJECT IS STILL PENDING"; //Subject of the email
   let body = `Project Number: ${docNum}\nProject Name: ${docName}\nStatus: ${status}\nDue Date: ${dueDate}\n\nThis is a reminder that the project is due today!`; //The body of the email
   
@@ -60,8 +56,8 @@ function sendEmail(docNum, docName, dueDate, status) {
       const email = colmnVal[i][0];
 
       if (typeof email === "string" && email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        MailApp.sendEmail(email, subject, body);
-        console.log(email + " " + subject + " " + body);
+        GmailApp.sendEmail(email, subject, body, {from: senderEmail});
+        console.log(subject + " " + body);
         Logger.log("Email sent to " + email);
       }
     }
@@ -72,7 +68,7 @@ function trigger(){
     ScriptApp.newTrigger("main")
     .timeBased()
     .everyDays(1)
-    .atHour(9) // Adjust to your desired time
+    .atHour(5) // Adjust to your desired time
     .create();
 
 }
