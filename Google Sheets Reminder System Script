@@ -24,22 +24,24 @@ function main(){
   const statusColmnVal = sheet.getRange(10, 8, lstRw).getValues(); //Retrieves the values in row 10, column 8 (Status column)
   const numColmnVal = sheet.getRange(10, 1, lstRw).getValues(); //Retrieves the values in row 10, column 1 (Number column)
   const projNameVal = sheet.getRange(10, 4, lstRw).getValues(); //Retrieves the values in row 10, column 4 (Projects Column)
-  const completedVal = sheet.getRange(2, 6, lstRw).getValue();
-  const deadlineVal = sheet.getRange(3,6, lstRw).getValue();
+  let count = 0;
+  let sender = "rbtemplado@gmail.com"; //Configure the sender of the email (set up in Gmail sa alias first)
+  const currDate = new Date(); //Retrieves the date today by creating an object Date()
+ 
  
     //Iterates through the number of documents/projects 
     for (let i = 0; i < dueColmnVal.length; i++){
       const date = dueColmnVal[i][0]; //Iterates through dates in the due date/deadline column
       const status = statusColmnVal[i][0]; //Iterates through status in the status column
-      const currDate = new Date(); //Retrieves the date today by creating an object Date()
       const formattedStatus = Utilities.formatString("%s", status);//Formatting for the status to string
       const projNum = numColmnVal[i][0];
       const formattedProjNum = Utilities.formatString("%d", projNum);//Formatting the project num into a int/num
       const projName = projNameVal[i][0];
       const formattedProjName = Utilities.formatString("%s", projName);//Formatting projName into a string
       const formattedCurrDate = Utilities.formatDate(currDate, "Asia/Manila", "yyyy-MM-dd"); //Formatted Due date to String
-      let sender = "rbtemplado@gmail.com"; //Configure the sender of the email (set up in Gmail sa alias first)
-     
+    
+      
+      
       
       //Executes if the data in the column date is equal to object Date, if not, skip; 
        if (Object.prototype.toString.call(date) === "[object Date]" && date !== "") {
@@ -47,16 +49,21 @@ function main(){
           
           //If the deadline is equal to the current date and the status is equal to pending, then the statement is true and will send email
           if(formattedDdate === formattedCurrDate && formattedStatus === "Pending"){
-               sendEmail(formattedProjNum, formattedProjName, formattedDdate, formattedStatus, sender, currDate);
+            count++;   
           }
        }  
+       
+      }
+
+      if(count > 0){
+        sendEmail(sender, currDate, count);
       }
   }
 
 //This function sends email; Transferring the data from Main function to sendEmail function to borrow values
-function sendEmail(projNum, projName, dueDate, status, senderEmail, newCurrDate) {
+function sendEmail(senderEmail, newCurrDate, projCount) {
   const completedVal = sheet.getRange(2,6).getValue();
-  const pedningVal = sheet.getRange(3,6).getValue();
+  const pendingVal = sheet.getRange(3,6).getValue();
   const dueDateVal = sheet.getRange(5,6).getValue();
   const deptName = sheet.getRange(10,3).getValue();
 
@@ -64,16 +71,23 @@ function sendEmail(projNum, projName, dueDate, status, senderEmail, newCurrDate)
   
   
   let subject = "DUE PROJECT IS STILL PENDING"; //Subject of the email
-  let body = `Good Morning Sir/Madame,\n This Refers to the various instructions from the PCEO that are included in our tracker:\n
-                  Date Today: ${currentDate}\n
-                  Department: ${deptName}\n
-                  Due Today: #${projNum} ${projName} ${status}\n
-                  No. of Pending: ${pedningVal}\n
-                  No. of Completed: ${completedVal}\n
-                  No. of Due Date: ${dueDateVal}\n
-                  \n In This regard, may we kindly request updates on the status of these items? Please let me know if there is a need to adjust the due dates.\n
-                  \n You may access the tracker via the following link: https://docs.google.com/spreadsheets/d/1m-7uTfglQcdo64C3P7l1KK-iBmLDuivn1WKqnu9FPbQ/edit?gid=1468352681#gid=1468352681\n
-                  \n Thank you po!`; //The body of the email
+  let body = `Good Morning Sir/Mesdames,
+
+This refers to the various instructions from the PCEO that are included in our tracker.
+
+In this regard, may we kindly request updates on the status of these items? Please let me know if there is a need to adjust the due dates.
+              
+You may access the tracker via the following link: https://docs.google.com/spreadsheets/d/1m-7uTfglQcdo64C3P7l1KK-iBmLDuivn1WKqnu9FPbQ/edit?gid=1468352681#gid=1468352681\n
+Thank you po!
+
+Date Today: ${currentDate}
+Department: ${deptName}
+Due Today: ${projCount} Pending
+No. of Pending: ${pendingVal}
+No. of Completed: ${completedVal}
+No. of Due Date: ${dueDateVal}
+Total: ${pendingVal + completedVal}`;
+                  
   
   const lstRw = sheet.getLastRow(); //Retrieves the value of the last column that has value.
 	  if(lstRw === 0){
