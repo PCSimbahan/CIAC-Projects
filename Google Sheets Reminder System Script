@@ -4,13 +4,13 @@
     If you want to make the email sender flexible, make use of GmailApp.sendEmail(); In conjunction, you must set up different aliases into your gmail settings to make other emails recognizable.
     If you want to make use of MailApp.sendEmail and change the sender of the email, you must run the script with the account you want to send the email with.
 
+    If you want to modify, improve and overhaul the script, you are free to do so. 
+
 */
 
 const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(); //Gives access and retrieves the values of the spreadsheet 
 
 function practice(){
-  const lstRw = sheet.getLastRow();
-  
 
   Logger.log("Completed Tasks: " + completedVal);
   Logger.log("Pending Tasks: " + deadlineVal);
@@ -22,8 +22,6 @@ function main(){
   const lstRw = sheet.getLastRow(); //Gets the Last Row of the column
   const dueColmnVal = sheet.getRange(10, 7, lstRw).getValues(); //Retrieves the values in row 10, column 7 (Due date column)
   const statusColmnVal = sheet.getRange(10, 8, lstRw).getValues(); //Retrieves the values in row 10, column 8 (Status column)
-  const numColmnVal = sheet.getRange(10, 1, lstRw).getValues(); //Retrieves the values in row 10, column 1 (Number column)
-  const projNameVal = sheet.getRange(10, 4, lstRw).getValues(); //Retrieves the values in row 10, column 4 (Projects Column)
   let count = 0;
   let sender = "rbtemplado@gmail.com"; //Configure the sender of the email (set up in Gmail sa alias first)
   const currDate = new Date(); //Retrieves the date today by creating an object Date()
@@ -34,25 +32,16 @@ function main(){
       const date = dueColmnVal[i][0]; //Iterates through dates in the due date/deadline column
       const status = statusColmnVal[i][0]; //Iterates through status in the status column
       const formattedStatus = Utilities.formatString("%s", status);//Formatting for the status to string
-      const projNum = numColmnVal[i][0];
-      const formattedProjNum = Utilities.formatString("%d", projNum);//Formatting the project num into a int/num
-      const projName = projNameVal[i][0];
-      const formattedProjName = Utilities.formatString("%s", projName);//Formatting projName into a string
       const formattedCurrDate = Utilities.formatDate(currDate, "Asia/Manila", "yyyy-MM-dd"); //Formatted Due date to String
     
-      
-      
-      
       //Executes if the data in the column date is equal to object Date, if not, skip; 
        if (Object.prototype.toString.call(date) === "[object Date]" && date !== "") {
           const formattedDdate = Utilities.formatDate(date, "Asia/Manila", "yyyy-MM-dd");
-          
           //If the deadline is equal to the current date and the status is equal to pending, then the statement is true and will send email
           if(formattedDdate === formattedCurrDate && formattedStatus === "Pending"){
             count++;   
           }
        }  
-       
       }
 
       if(count > 0){
@@ -68,8 +57,7 @@ function sendEmail(senderEmail, newCurrDate, projCount) {
   const deptName = sheet.getRange(10,3).getValue();
 
   const currentDate = Utilities.formatDate(newCurrDate, "Asia/Manila", "EEEE, MMMM d, yyyy"); //Current date to show the Month Name, and day
-  
-  
+
   let subject = "DUE PROJECT IS STILL PENDING"; //Subject of the email
   let body = `Good Morning Sir/Mesdames,
 
@@ -83,7 +71,7 @@ Thank you po!
 Date Today: ${currentDate}
 Department: ${deptName}
 Due Today: ${projCount} Pending
-No. of Pending: ${pendingVal}
+Total No. of Pending: ${pendingVal}
 No. of Completed: ${completedVal}
 No. of Due Date: ${dueDateVal}
 Total: ${pendingVal + completedVal}`;
@@ -96,11 +84,11 @@ Total: ${pendingVal + completedVal}`;
 }
 
 //retrieves the values of each cell
-	  const colmnVal = sheet.getRange(2, 11, lstRw).getValues(); 
+	  const emailVal = sheet.getRange(2,9, lstRw).getValues(); 
 
  // Looping statement that sends email to all the users listed in the column 
-    for(let i = 0; i < colmnVal.length; i++ ){
-      const email = colmnVal[i][0];
+    for(let i = 0; i < emailVal.length; i++ ){
+      const email = emailVal[i][0];
 
       if (typeof email === "string" && email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         GmailApp.sendEmail(email, subject, body, {from: senderEmail});//Utilizing GmailApp to make use of the flexible format
@@ -115,7 +103,7 @@ function trigger(){
     ScriptApp.newTrigger("main")
     .timeBased()
     .everyDays(1)
-    .atHour(5) // Adjust to your desired time (uses a 24-hour time format)
+    .atHour(8) // Adjust to your desired time (uses a 24-hour time format)
     .create();
 
 }
