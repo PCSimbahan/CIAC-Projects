@@ -10,12 +10,6 @@
 
 const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(); //Gives access and retrieves the values of the spreadsheet 
 
-function practice(){
-
-  Logger.log("Completed Tasks: " + completedVal);
-  Logger.log("Pending Tasks: " + deadlineVal);
-
-}
 
 //This tracks the deadline and status of the documents (deadline tracker)
 function main(){
@@ -34,12 +28,12 @@ function main(){
       const formattedStatus = Utilities.formatString("%s", status);//Formatting for the status to string
       const formattedCurrDate = Utilities.formatDate(currDate, "Asia/Manila", "yyyy-MM-dd"); //Formatted Due date to String
     
-      //Executes if the data in the column date is equal to object Date, if not, skip; 
+      //Executes if the data in the column date is equal to object Date, if not, skip;  
        if (Object.prototype.toString.call(date) === "[object Date]" && date !== "") {
           const formattedDdate = Utilities.formatDate(date, "Asia/Manila", "yyyy-MM-dd");
           //If the deadline is equal to the current date and the status is equal to pending, then the statement is true and will send email
           if(formattedDdate === formattedCurrDate && formattedStatus === "Pending"){
-            count++;   
+            count++;// if the project is due today (Date today) the count adds
           }
        }  
       }
@@ -51,30 +45,40 @@ function main(){
 
 //This function sends email; Transferring the data from Main function to sendEmail function to borrow values
 function sendEmail(senderEmail, newCurrDate, projCount) {
+  //projCount is the total due today 
   const completedVal = sheet.getRange(2,6).getValue();
-  const pendingVal = sheet.getRange(3,6).getValue();
-  const dueDateVal = sheet.getRange(5,6).getValue();
-  const deptName = sheet.getRange(10,3).getValue();
+  const pendingVal = sheet.getRange(3,6).getValue();// pendingVal is considered as the tasks to be done
+  const dueDateVal = sheet.getRange(5,6).getValue();// dueDateVal is considered as the overdue projects
+  const deptName = sheet.getRange(11,3).getValues();
 
   const currentDate = Utilities.formatDate(newCurrDate, "Asia/Manila", "EEEE, MMMM d, yyyy"); //Current date to show the Month Name, and day
 
-  let subject = "DUE PROJECT IS STILL PENDING"; //Subject of the email
-  let body = `Good Morning Sir/Mesdames,
+  let subject = "Request for Updates on OPCEO Directives Tracker"; //Subject of the email
+  let body = `Dear Sirs/Mesdames,
 
-This refers to the various instructions from the PCEO that are included in our tracker.
+Good day!
 
-In this regard, may we kindly request updates on the status of these items? Please let me know if there is a need to adjust the due dates.
-              
-You may access the tracker via the following link: https://docs.google.com/spreadsheets/d/1m-7uTfglQcdo64C3P7l1KK-iBmLDuivn1WKqnu9FPbQ/edit?gid=1468352681#gid=1468352681\n
-Thank you po!
+This refers to the various instructions from the PCEO recorded in our OPCEO Directives Tracker, which is due today.
+
+In this regard, may we kindly request updates on the status of these items? If there is a need to adjust the due dates, please inform OPCEO accordingly.
 
 Date Today: ${currentDate}
 Department: ${deptName}
 Due Today: ${projCount} Pending
-Total No. of Pending: ${pendingVal}
-No. of Completed: ${completedVal}
-No. of Due Date: ${dueDateVal}
-Total: ${pendingVal + completedVal}`;
+Overdue: ${dueDateVal}
+Tasks: ${pendingVal}
+Completed: ${completedVal}
+Total: ${pendingVal + completedVal}
+
+You may access the tracker via the following link: https://docs.google.com/spreadsheets/d/1m-7uTfglQcdo64C3P7l1KK-iBmLDuivn1WKqnu9FPbQ/edit?gid=1468352681#gid=1468352681
+
+For any concerns, please feel free to contact Mr. Raymond Templado or Ms. Abet Tan at (045) 599-2888 loc. 100.
+
+Thank you for your cooperation.
+
+Best regards,
+Office of the President and CEO
+Clark International Airport Corporation`;
                   
   
   const lstRw = sheet.getLastRow(); //Retrieves the value of the last column that has value.
@@ -84,7 +88,7 @@ Total: ${pendingVal + completedVal}`;
 }
 
 //retrieves the values of each cell
-	  const emailVal = sheet.getRange(2,9, lstRw).getValues(); 
+	  const emailVal = sheet.getRange(2,8, lstRw).getValues(); 
 
  // Looping statement that sends email to all the users listed in the column 
     for(let i = 0; i < emailVal.length; i++ ){
