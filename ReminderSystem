@@ -1,0 +1,78 @@
+/*This Reminder System Script was done by OJT Patrick on the year 2025 of March
+  Prerequisites require:
+    If you want to make the email sender flexible, make use of GmailApp.sendEmail(); In conjunction, you must set up different aliases into your gmail settings to make other emails recognizable.
+    If you want to make use of MailApp.sendEmail and change the sender of the email, you must run the script with the account you want to send the email with.
+
+    If you want to modify, improve and overhaul the script, you are free to do so.*/
+
+const sheet = SpreadsheetApp.getActiveSpreadsheet(); //Gives access and retrieves the values of the spreadsheet 
+var newSheet = sheet.getSheetByName("Pat");
+
+//This tracks the deadline and status of the documents (deadline tracker)
+function main(){
+  const currDate = new Date();
+  const formattedCurrDate = Utilities.formatDate(currDate, "Asia/Manila", "EEEE MMMM d, yyyy");
+  if (newSheet.getName() !== "Pat") return; //Specifying which worksheet is to be affected by the script
+
+  const completedVal = newSheet.getRange(2,6).getValue();
+  const pendingVal = newSheet.getRange(3,6).getValue();// pendingVal is considered as the tasks to be done
+  const dueDateVal = newSheet.getRange(5,6).getValue();// dueDateVal is considered as the overdue projects
+  const totalDocs = newSheet.getRange(4,6).getValue();
+
+  let sender = "rbtemplado@gmail.com";
+  sendEmail(sender, formattedCurrDate, completedVal, pendingVal, dueDateVal, totalDocs);
+
+}
+      
+  
+
+//This function sends email; Transferring the data from Main function to sendEmail function to borrow values
+function sendEmail(senderEmail, newCurrDate, newCompletedVal, newPendingVal, newDueDateVal, newTotalDocs) {
+  //projCount is the total due today 
+  
+
+  let subject = "Reminder on OPCEO Documents Tracker"; //Subject of the email
+  let body = `Good day! This is a weekly reminder.
+
+This refers to the various instructions from the PCEO recorded in our OP Documents Tracker
+
+Date Today: ${newCurrDate}
+Overdue: ${newDueDateVal}  
+Tasks: ${newPendingVal}
+Completed: ${newCompletedVal}
+Total: ${newTotalDocs}
+
+You may access the tracker via the following link: https://docs.google.com/spreadsheets/d/1IH15kMXpgJVEVr-sexi0HPzQZ3liHIxHlT50ImdLYMQ/edit?gid=1762733180#gid=1762733180`;
+Logger.log(body);
+                  
+  
+  const lstRw = newSheet.getLastRow(); //Retrieves the value of the last column that has value.
+	  if(lstRw === 0){
+		  Logger.log("This has no value");	
+	  return;		
+}
+
+//retrieves the values of each cell. This takes all the email in the email list
+	  const emailVal = newSheet.getRange(2,12, lstRw).getValues(); 
+
+ // Looping statement that sends email to all the users listed in the column 
+    for(let i = 0; i < emailVal.length; i++ ){
+      const email = emailVal[i][0];
+
+      if (typeof email === "string" && email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        GmailApp.sendEmail(email, subject, body, {from: senderEmail});//Utilizing GmailApp to make use of the flexible format
+        console.log(subject + " " + body);
+        Logger.log("Email sent to " + email);
+      }
+    }
+  }
+
+function trigger(){
+   // Create a time-based trigger to run the script daily
+    ScriptApp.newTrigger("main")
+    .timeBased()
+    .everyWeeks(1)
+    .onWeekDay(ScriptApp.WeekDay.MONDAY)
+    .atHour(8) // Adjust to your desired time (uses a 24-hour time format)
+    .create();
+}
