@@ -1,0 +1,76 @@
+const dashSheet = SpreadsheetApp.getActiveSpreadsheet();
+var newSheet = dashSheet.getSheetByName("Dashboard");
+
+//This tracks the deadline and status of the documents (deadline tracker)
+function main(){
+  
+  if (newSheet.getName() !== "Dashboard") return; //Specifying which worksheet is to be affected by the script
+  const lstRw = newSheet.getLastRow();
+  const deptClmnVal = newSheet.getRange(9, 1, 55).getValues();
+  const taskClmnVal = newSheet.getRange(9, 3, 55).getValues();
+  let sender = "rbtemplado@gmail.com";
+  
+
+  for (let i = 0; i < deptClmnVal.length; i++) {
+  const taskCount = taskClmnVal[i][0];  // Task count from column
+  const deptName = deptClmnVal[i][0];
+    if (deptName !== 0 && taskCount > 0) {
+    
+      // Find the department in the deptList
+      const deptObj = deptList.find(item => item.department === deptName);
+    
+        if (deptObj) {
+        // If department is found, retrieve the email and log it
+          const rcvEmail = deptObj.email;
+          if (Array.isArray(rcvEmail)) {
+          // If department has multiple emails, iterate through them
+          rcvEmail.forEach(email => {
+            Logger.log(`${deptObj.department}: ${email}`);});} 
+          else {
+            // If department has a single email, log it directly
+            //Logger.log(`${deptObj.department}: ${rcvEmail}`);}
+
+          //Logger.log(`${deptName} ${taskCount} ${rcvEmail}`);
+    }}
+    sendEmail(sender, deptName, taskCount, rcvEmail);
+        }
+  }
+}
+
+
+function sendEmail(senderEmail, dptName, tskCount, receiver) {
+  //projCount is the total due today 
+  /*const completedVal = sheet.getRange(2,6).getValue();
+  const pendingVal = sheet.getRange(3,6).getValue();// pendingVal is considered as the tasks to be done
+  const dueDateVal = sheet.getRange(5,6).getValue();// dueDateVal is considered as the overdue projects
+  const deptName = sheet.getRange(11,3).getValues();*/
+  const currDate = new Date();
+  const formattedRcv = Utilities.formatString("%s", receiver);
+
+  const currentDate = Utilities.formatDate(currDate, "Asia/Manila", "EEEE, MMMM d, yyyy"); //Current date to show the Month Name, and day
+
+  let subject = "OPCEO Documents Tracker"; //Subject of the email
+  let body = `
+Date Today: ${currentDate}
+Department: ${dptName}
+Pending: ${tskCount} Tasks
+
+You may access the tracker via the following link: https://docs.google.com/spreadsheets/d/1IH15kMXpgJVEVr-sexi0HPzQZ3liHIxHlT50ImdLYMQ/edit?gid=1468352681#gid=1468352681`;
+                  		
+ // Looping statement that sends email to all the users listed in the column 
+      if (typeof formattedRcv === "string" && formattedRcv.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formattedRcv)) {
+        GmailApp.sendEmail(formattedRcv, subject, body, {from: senderEmail});//Utilizing GmailApp to make use of the flexible format
+        console.log(subject + " " + body);
+        Logger.log("Email sent to " + formattedRcv);
+      }
+  }
+
+function trigger(){
+   // Create a time-based trigger to run the script weekly
+    ScriptApp.newTrigger("main")
+    .timeBased()
+    .everyWeeks(1)
+    .onWeekDay(ScriptApp.WeekDay.MONDAY)
+    .atHour(8) // Adjust to your desired time (uses a 24-hour time format)
+    .create();
+}
