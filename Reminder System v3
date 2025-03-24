@@ -12,7 +12,7 @@ function mainV3() {
   const ovrdueClmnVal = newSheet.getRange(9, 5, 55).getValues();
   const cmpltdClmnVal = newSheet.getRange(9,6, 55).getValues(); 
 
-  let sender = "rbtemplado@gmail.com";
+  let sender = "email@gmail.com";
   
   for (let i = 0; i < deptClmnVal.length; i++) {
     const taskCount = taskClmnVal[i][0];  // Task count from column
