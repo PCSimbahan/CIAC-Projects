@@ -17,7 +17,7 @@ function main(){
   const dueColmnVal = sheet.getRange(10, 7, lstRw).getValues(); //Retrieves the values in row 10, column 7 (Due date column)
   const statusColmnVal = sheet.getRange(10, 8, lstRw).getValues(); //Retrieves the values in row 10, column 8 (Status column)
   let count = 0;
-  let sender = "rbtemplado@gmail.com"; //Configure the sender of the email (set up in Gmail sa alias first)
+  let sender = "email@gmail.com"; //Configure the sender of the email (set up in Gmail sa alias first)
   const currDate = new Date(); //Retrieves the date today by creating an object Date()
  
  
