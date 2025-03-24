@@ -19,7 +19,7 @@ function main(){
   const dueDateVal = newSheet.getRange(5,6).getValue();// dueDateVal is considered as the overdue projects
   const totalDocs = newSheet.getRange(4,6).getValue();
 
-  let sender = "rbtemplado@gmail.com";
+  let sender = "email@gmail.com";
   sendEmail(sender, formattedCurrDate, completedVal, pendingVal, dueDateVal, totalDocs);
 
 }
