@@ -1,19 +1,21 @@
-const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-
 function onEdit(x) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetName = sheet.getSheetByName("Outgoing Logsheet");
+
+  if(x.source.getSheetName() !== "Outgoing Logsheet") return;
   // Get the range of the edited cell
   var inputRange = x.range;
   
   // Check if the edited cell is in column C (column 3)
   if (inputRange.getColumn() === 3) {  
     var row = inputRange.getRow();  // Get the row number of the edited cell
-    var docName = sheet.getRange(row, 3).getValue();  // Get the value of docName from the edited cell in column C
-    var range = sheet.getRange(row, 7);  // Get the target range for timestamp (same row in column G)
+    var docName = sheetName.getRange(row, 3).getValue();  // Get the value of docName from the edited cell in column C
+    var range = sheetName.getRange(row, 7);  // Get the target range for timestamp (same row in column G)
 
     // If docName is not empty, add the timestamp
     if (docName.trim() !== "") {
       var currDate = new Date();
-      var formattedDate = Utilities.formatDate(currDate, "Asia/Manila", "MMM-dd-yyyy hh:mm:ss a");
+      var formattedDate = Utilities.formatDate(currDate, "Asia/Manila", `MMM-dd-yyyy hh:mm:ss a`);
       range.setValue(formattedDate);  // Set the timestamp in the respective cell in column G
     }else{
       range.setValue("");
